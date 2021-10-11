@@ -1,7 +1,7 @@
-
-import 'package:multiple_api_app/models/name_to_code_model.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '../models/name_to_code_model.dart';
 
 class NameToCodeApi {
   static Future<NameToCodeModel> getCountryId(String name) async {

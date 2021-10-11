@@ -1,49 +1,119 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:multiple_api_app/models/code_to_country_model.dart';
-import 'package:multiple_api_app/services/code_to_country_api.dart';
-import '../models/name_to_code_model.dart';
-import '../services/name_to_code_api.dart';
 
+import '../constants/color_constant.dart';
+
+import '../widgets/text_widget.dart';
+
+import '../models/code_to_country_model.dart';
+import '../models/name_to_code_model.dart';
 import '../models/age_model.dart';
 import '../models/gender_model.dart';
 
+import '../services/code_to_country_api.dart';
+import '../services/name_to_code_api.dart';
 import '../services/gender_api.dart';
 import '../services/age_api.dart';
 
 class Controller extends GetxController {
-  var currentIndex = 0.obs;
-  var genderName = "".obs;
-  var ageName = "".obs;
-  var countryName = "".obs;
-  var doNotShowGender = true.obs;
-  var isLoadingGender = false.obs;
+  TextWidget textWidget = Get.put(TextWidget());
+  ColorConstant constant = Get.put(ColorConstant());
+
+  var name = "".obs;
+  var allCountryNames = "".obs;
+
+  var endWidth = 0.0.obs;
+  var beginWidth = 0.0.obs;
+  var listOfLoadingText = <String>[""].obs;
+  RxList<bool> listOfShouldShowLottie = [true,true,true,true].obs;
+
+  final listKey = GlobalKey<AnimatedListState>();
+
   Future<GenderModel>? genderData;
   Future<AgeModel>? ageData;
   Future<NameToCodeModel>? countryIdData;
   Future<List<CodeToCountryModel>>? countryNameData;
 
-  changeIndex(int index) {
-    currentIndex.value = index;
+  changeWidth() {
+    endWidth.value = endWidth.value + 51.0;
   }
 
-  saveGenderName(String val) {
-    genderName.value = val;
+  swapValues() {
+    beginWidth.value = endWidth.value;
   }
 
-  saveAgeName(String val) {
-    ageName.value = val;
+  revertToOriginal() {
+    beginWidth.value = 0.0;
+    endWidth.value = 51.0;
+    listOfLoadingText.clear();
+    for(int i = 0; i<=3; i++) {
+      listOfShouldShowLottie[i] = true;
+    }
   }
 
-  saveCountryName(String val) {
-    countryName.value = val;
+  changeValueOfShouldShowLottie (int index) {
+    listOfShouldShowLottie[index] = false;
   }
 
-  changeIsLoadingGender(bool val) {
-    isLoadingGender.value = val;
+  setLoadingText(int val) {
+    if (val == 1) {
+      addItemToList(0, "Getting Gender...");
+    } else if (val == 2) {
+      removeItemFromList(0);
+      addItemToList(0, "Got Gender").whenComplete(() => changeValueOfShouldShowLottie(0));
+      addItemToList(1, "Getting Country Code...");
+    } else if (val == 3) {
+      removeItemFromList(1);
+      addItemToList(1, "Got Age").whenComplete(() => changeValueOfShouldShowLottie(1));
+      addItemToList(2, "Getting Country Code...");
+    } else if (val == 4) {
+      removeItemFromList(2);
+      addItemToList(2, "Got Country Code").whenComplete(() => changeValueOfShouldShowLottie(2));
+      addItemToList(3, "Getting Country Name...");
+    } else {
+      removeItemFromList(3);
+      addItemToList(3, "Got Country Name").whenComplete(() => changeValueOfShouldShowLottie(3));
+    }
   }
 
-  changeDoNotShowGender(bool val) {
-    doNotShowGender.value = val;
+  removeItemFromList(int index) {
+    final removedItem = listOfLoadingText[index];
+
+    listOfLoadingText.removeAt(index);
+    listKey.currentState?.removeItem(
+        index,
+        (context, animation) => FadeTransition(
+            opacity: animation,
+            child: Center(child: textWidget.getGenderTextWidget(removedItem))),
+        duration: const Duration(milliseconds: 500));
+  }
+
+  Future<void> addItemToList(int index, String text) async {
+    listOfLoadingText.add(text);
+    listKey.currentState?.insertItem(index,
+        duration: Duration(milliseconds: index % 2 == 0 ? 400 : 800));
+  }
+
+  String mergeCountryNames(List<CodeToCountryModel> data) {
+    int i = 0;
+    allCountryNames.value = "";
+    for (i = 0; i < data.length; i++) {
+      if (i < data.length - 2) {
+        allCountryNames.value =
+            allCountryNames.value + data.elementAt(i).countryName + ", ";
+      } else if (i < data.length - 1) {
+        allCountryNames.value =
+            allCountryNames.value + data.elementAt(i).countryName + " or ";
+      } else {
+        allCountryNames.value =
+            allCountryNames.value + data.elementAt(i).countryName;
+      }
+    }
+    return allCountryNames.value;
+  }
+
+  saveName(String val) {
+    name.value = val;
   }
 
   getGender(String val) {

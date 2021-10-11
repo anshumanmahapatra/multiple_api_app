@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../screens/pseudo_home.dart';
+import '../screens/home_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((val) => runApp(const MyApp()));
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    PseudoHome pseudoHome = Get.put(const PseudoHome());
+    HomeScreen genderScreen = Get.put(const HomeScreen());
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: pseudoHome,
+      home: genderScreen,
     );
   }
 }

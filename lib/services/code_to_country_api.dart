@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:multiple_api_app/models/code_to_country_model.dart';
-import 'package:multiple_api_app/models/name_to_code_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+import '../models/code_to_country_model.dart';
+import '../models/name_to_code_model.dart';
+
 
 class CodeToCountryApi {
   static Future<List<CodeToCountryModel>> getCountryName(

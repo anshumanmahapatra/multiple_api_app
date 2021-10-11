@@ -1,6 +1,7 @@
-import '../models/gender_model.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+
+import '../models/gender_model.dart';
 
 class GenderApi {
   static Future<GenderModel> getGender(String name) async {
